@@ -4,8 +4,11 @@ require("./db/config");
 const user =require("./db/user");
 const jwt =require('jsonwebtoken');
 const jwtKey ='e-comm';
+const bcrypt = require('bcrypt');
+const cors =require('cors')
 const app =express();
 app.use(express.json())
+app.use(cors());
 
 app.post("/register",async(req,res)=>{
     try{
@@ -17,10 +20,14 @@ app.post("/register",async(req,res)=>{
         if(userExists){
             return res.status(409).json({error:"User Already Register."})
         }
-        const newUser = new user({name,email,password});
+        const saltRounds = 10; 
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const newUser = new user({name,email,password:hashedPassword});
         const saveUser =await newUser.save();
         if(saveUser){
-            return res.status(200).json({message:"User Successful register",user:saveUser});
+       const userResponse = { _id: saveUser._id, name: saveUser.name, email: saveUser.email };
+            return res.status(200).json({message:"User Successful register",status:200,user:userResponse});
 
         }else{
             return res.status(404).json({error:"User Not Found"})
@@ -37,10 +44,12 @@ app.post("/login",async(req,res)=>{
         if(!email || !password){
             return res.status(409).json({errro:"Email and Password are required."})
         }
-        const result = await user.findOne({email,password})
+        
+        const result = await user.findOne({email,password}).select('-password');
         if(result){
+            
             const token = jwt.sign({user:result},jwtKey,{expiresIn:"2h"})
-            return res.status(200).json({message:"Login Successful",user:result,auth:token})
+            return res.status(200).json({message:"Login Successful",status:200,user:result,auth:token})
         }else{
             return res.status(400).json({error:"Wrong Email and Password"})
         }
