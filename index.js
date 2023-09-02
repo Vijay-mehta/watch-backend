@@ -16,10 +16,18 @@ const product = require('./db/product')
 app.post("/register", async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        const userExists = await user.findOne({ email });
-        if (!name || !email || !password) {
-            return res.status(400).json({ error: "Email And Password are required." })
+        let errorMessage = "";
+        if (!name) {
+            errorMessage = "Missing 'name' field";
+        } else if (!email) {
+            errorMessage = "Missing 'email' field";
+        } else if (!password) {
+            errorMessage = "Missing 'password' field";
         }
+        if (errorMessage !== "") {
+            return res.status(400).json({ error: errorMessage });
+        }
+        const userExists = await user.findOne({ email });
         if (userExists) {
             return res.status(409).json({ error: "User Already Register." })
         }
@@ -55,6 +63,7 @@ app.post("/login", async (req, res) => {
         }
         const isPasswordValid = await bcrypt.compare(password, userFromDb.password);
         if (isPasswordValid) {
+            delete userFromDb._doc.password;
             const token = jwt.sign({ user: userFromDb }, jwtKey, { expiresIn: "2h" });
             return res.status(200).json({ message: "Login Successful", status: 200, user: userFromDb, auth: token });
         } else {
