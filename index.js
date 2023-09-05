@@ -79,7 +79,7 @@ app.post("/login", async (req, res) => {
 
 app.post('/create-product', async (req, res) => {
     try {
-        const { name, brand, price, category,userId } = req.body;
+        const { name, brand, price, category, userId } = req.body;
         let errorMessage = "";
         if (!name) {
             errorMessage = "Missing 'name' field";
@@ -90,16 +90,22 @@ app.post('/create-product', async (req, res) => {
         } else if (!category) {
             errorMessage = "Missing 'category' field";
         }
-        else if (!category) {
+        else if (!userId) {
             errorMessage = "Missing 'userId' field";
         }
         if (errorMessage !== "") {
             return res.status(409).json({ error: errorMessage });
         }
-        const newResult = new product({ name, brand, price, category,userId });
+
+        const databaseObjectId = await user.findOne();
+
+        if (userId !== databaseObjectId._id.toString()) {
+            res.status(404).json({ error: "User not found" });
+        }
+        const newResult = new product({ name, brand, price, category, userId });
         const saveProduct = await newResult.save();
         if (saveProduct) {
-            return res.status(200).json({ message: 'Product created successful', product: saveProduct })
+            return res.status(200).json({ message: 'Product created successful', status: 200, product: saveProduct })
 
         } else {
             return res.status(400).json({ error: "Wrong product name" });
