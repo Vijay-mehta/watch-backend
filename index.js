@@ -116,4 +116,19 @@ app.post('/create-product', async (req, res) => {
     }
 })
 
+// <------------------------ Product List--------->
+
+app.get('/product-list',async(req,res)=>{
+    try{
+        const result =await product.find();
+        if(result){
+            res.status(200).json({message:"Product listing",data:result})
+        }else{
+            res.status(400).json({error:"User is Not Found"})
+        }
+    }catch(error){
+        res.status(500).json({message:"You Want to Something"})
+    }
+})
+
 app.listen(8000);
