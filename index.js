@@ -9,71 +9,11 @@ const cors = require('cors')
 const app = express();
 app.use(express.json())
 app.use(cors());
-const product = require('./db/product')
+const product = require('./db/product');
+const authRoutes = require("./routes/auth");
 
 // <------------------------ Register--------->
-
-app.post("/register", async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        let errorMessage = "";
-        if (!name) {
-            errorMessage = "Missing 'name' field";
-        } else if (!email) {
-            errorMessage = "Missing 'email' field";
-        } else if (!password) {
-            errorMessage = "Missing 'password' field";
-        }
-        if (errorMessage !== "") {
-            return res.status(400).json({ error: errorMessage });
-        }
-        const userExists = await user.findOne({ email });
-        if (userExists) {
-            return res.status(409).json({ error: "User Already Register." })
-        }
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        const newUser = new user({ name, email, password: hashedPassword });
-        const saveUser = await newUser.save();
-        if (saveUser) {
-            const userResponse = { _id: saveUser._id, name: saveUser.name, email: saveUser.email };
-            return res.status(200).json({ message: "User Successful register", status: 200, user: userResponse });
-
-        } else {
-            return res.status(404).json({ error: "User Not Found" })
-        }
-    } catch (error) {
-        console.error("Registration error:", error);
-        return res.status(500).json({ error: "Something went to wrong" });
-    }
-})
-
-// <------------------------ Login--------->
-
-app.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(409).json({ error: "Email and Password are required." });
-        }
-        const userFromDb = await user.findOne({ email });
-        if (!userFromDb) {
-            return res.status(400).json({ error: "User not found" });
-        }
-        const isPasswordValid = await bcrypt.compare(password, userFromDb.password);
-        if (isPasswordValid) {
-            delete userFromDb._doc.password;
-            const token = jwt.sign({ user: userFromDb }, jwtKey, { expiresIn: "2h" });
-            return res.status(200).json({ message: "Login Successful", status: 200, user: userFromDb, auth: token });
-        } else {
-            return res.status(400).json({ error: "Wrong Email and Password" });
-        }
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "Something Went Wrong" });
-    }
-});
+authRoutes(app);
 
 // <------------------------ Create Product--------->
 
@@ -97,10 +37,9 @@ app.post('/create-product', async (req, res) => {
             return res.status(409).json({ error: errorMessage });
         }
 
-        const databaseObjectId = await user.findOne();
-
-        if (userId !== databaseObjectId._id.toString()) {
-            res.status(404).json({ error: "User not found" });
+        const isUser = await user.findOne({ _id: userId });
+        if (!isUser) {
+            return res.status(404).json({ error: "User not found" });
         }
         const newResult = new product({ name, brand, price, category, userId });
         const saveProduct = await newResult.save();
@@ -116,11 +55,13 @@ app.post('/create-product', async (req, res) => {
     }
 })
 
-// <------------------------ Product List--------->
+// // <------------------------ Product List--------->
 
-app.get('/product-list',async(req,res)=>{
+app.post('/product-list',async(req,res)=>{
     try{
-        const result =await product.find();
+        const {myId} = req.body; 
+        console.log("myId", myId)
+        const result = await product.find({userId: myId});
         if(result){
             res.status(200).json({message:"Product listing",data:result})
         }else{
@@ -131,4 +72,8 @@ app.get('/product-list',async(req,res)=>{
     }
 })
 
-app.listen(8000);
+app.listen(8000, () => {
+    console.log("Port Listening at :- http://localhost:8000")
+});
+
+module.exports = app;
