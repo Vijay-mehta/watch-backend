@@ -1,5 +1,4 @@
 const express = require("express");
-const mongoose = require('mongoose');
 require("../db/config");
 const user = require("../db/user");
 const jwt = require('jsonwebtoken');
