@@ -5,6 +5,7 @@ app.use(express.json())
 app.use(cors());
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
+const searchRout = require("./routes/search");
 
 // <------------------------ auth--------->
 authRoutes(app);
@@ -13,6 +14,8 @@ authRoutes(app);
 
 productRoutes(app);
 
+
+searchRout(app);
 
 // ---------- port-------------->
 app.listen(8000, () => {

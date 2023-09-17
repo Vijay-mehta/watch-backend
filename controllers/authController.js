@@ -68,7 +68,7 @@ module.exports = {
             }
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: "Something Went Wrong" });
+            return res.status(500).json({ error: "Something Went to Wrong" });
         }
     }
 }

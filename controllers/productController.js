@@ -8,8 +8,6 @@ app.use(cors());
 const product = require('../db/product');
 
 
-
-
 module.exports={
     createProduct:async(req,res)=>{
         try {
@@ -52,12 +50,42 @@ module.exports={
     productList:async(req,res)=>{
         try{
             const {myId} = req.body; 
-            console.log("myId", myId)
             const result = await product.find({userId: myId});
             if(result){
                 res.status(200).json({message:"Product listing",data:result})
             }else{
                 res.status(400).json({error:"User is Not Found"})
+            }
+        }catch(error){
+            res.status(500).json({message:"You Want to Something"})
+        }
+    },
+    
+    productDelete:async(req,res)=>{
+        try{
+            const result = await product.deleteOne({ _id:req.params.id});
+            if(result){
+                res.status(200).json({message:"Product Delete Successful."})
+            }else{
+                res.status(400).json({error:"Product is Not Found"})
+            }
+        }catch(error){
+            res.status(500).json({message:"Something went to wrong"})
+        }
+    },
+
+    productUpdate:async(req,res)=>{
+        try{
+            
+            const result = await product.updateOne({
+                _id:req.params.id
+            },{
+                $set:req.body
+            });
+            if(result){
+                res.status(200).json({message:"Product Update Successful."})
+            }else{
+                res.status(400).json({error:"Product is Not Found"})
             }
         }catch(error){
             res.status(500).json({message:"You Want to Something"})
