@@ -13,7 +13,9 @@ module.exports ={
         try{
             const result = await product.find({
                "$or":[
-                {name:{$regex:req.params.key}}
+                {name:{$regex:req.params.key}},
+                {brand:{$regex:req.params.key}},
+                {category:{$regex:req.params.key}}
                ]
             });
             if(result){
