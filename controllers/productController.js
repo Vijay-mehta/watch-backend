@@ -10,7 +10,6 @@ const product = require('../db/product');
 
 module.exports = {
     createProduct: async (req, res) => {
-        console.log(req.body.ratings)
         try {
             const { name, brand, description, price, currency, availability, category, userId, ratings } = req.body;
             const uploadedFiles = req.files.map(file => ({
