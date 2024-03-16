@@ -82,8 +82,7 @@ module.exports = {
 
     productList: async (req, res) => {
         try {
-            const { myId } = req.body;
-            const result = await product.find({ userId: myId });
+            const result = await product.find({ userId: req.params.id });
             if (result) {
                 res.status(200).json({ message: "Product listing", data: result })
             } else {
@@ -107,21 +106,32 @@ module.exports = {
         }
     },
 
-    productUpdate: async (req, res) => {
+     productUpdate : async (req, res) => {
         try {
+            if (!req.files || req.files.length === 0) {
+                return res.status(400).json({ error: "No images uploaded." });
+            }
+                const imageUrls = req.files.map(file => file.path);
+                const updatedProductData = {
+                ...req.body,
+                images: imageUrls             };
+    
+            const result = await product.updateOne(
+                { _id: req.params.id },
+                updatedProductData
+            );
+            console.log("222",result)
 
-            const result = await product.updateOne({
-                _id: req.params.id
-            }, {
-                $set: req.body
-            });
-            if (result) {
-                res.status(200).json({ message: "Product Update Successful." })
+            if (result.modifiedCount > 0) {
+                res.status(200).json({ message: "Product Update Successful." });
             } else {
-                res.status(400).json({ error: "Product is Not Found" })
+                res.status(404).json({ error: "Product not found or no changes made." });
             }
         } catch (error) {
-            res.status(500).json({ message: "You Want to Something" })
+            console.error("Error in productUpdate:", error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
     }
+    
+    
 }

@@ -14,11 +14,8 @@ app.use(cors());
 
 module.exports = {
     register: async (req, res) => {
-        
-    
         try {
             const { name, email, password } = req.body;
-    
             let errorMessage = "";
            if (!req.file) {
                 errorMessage = "Missing 'image' field";
@@ -30,16 +27,13 @@ module.exports = {
             } else if (!password) {
                 errorMessage = "Missing 'password' field";
             }  
-    
             if (errorMessage !== "") {
                 return res.status(400).json({ error: errorMessage });
             }
-    
             const userExists = await user.findOne({ email });
             if (userExists) {
                 return res.status(409).json({ error: "User Already Register." });
             }
-    
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
     

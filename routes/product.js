@@ -3,9 +3,9 @@ const upload = require("../helper/multiMulter");
 
 const productRoutes = (app) => {
     app.post("/api/create-product", upload.array('images'), createProduct);
-    app.post("/api/product-list", productList);
+    app.get("/api/product-list/:id", productList);
     app.delete("/api/product-delete/:id", productDelete);
-    app.put("/api/product-update/:id", productUpdate);
+    app.put("/api/product-update/:id", upload.array('images'),productUpdate);
 };
 
 module.exports = productRoutes;
