@@ -15,9 +15,11 @@ app.use(cors());
 module.exports = {
     register: async (req, res) => {
         try {
-            const { name, email, password } = req.body;
+            console.log("1234",req)
+            const {image, name, email, password } = req.body;
+
             let errorMessage = "";
-           if (!req.file) {
+           if (!image) {
                 errorMessage = "Missing 'image' field";
             }
             else if (!name) {
@@ -37,7 +39,7 @@ module.exports = {
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-            const newUser = new user({ image: req.file.path, name, email, password: hashedPassword });
+            const newUser = new user({ image, name, email, password: hashedPassword });
             const saveUser = await newUser.save();
     
             if (saveUser) {
