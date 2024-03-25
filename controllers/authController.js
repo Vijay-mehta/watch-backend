@@ -15,11 +15,9 @@ app.use(cors());
 module.exports = {
     register: async (req, res) => {
         try {
-            console.log("1234",req)
-            const {image, name, email, password } = req.body;
-
+            const { image, name, email, password } = req.body;
             let errorMessage = "";
-           if (!image) {
+            if (!image) {
                 errorMessage = "Missing 'image' field";
             }
             else if (!name) {
@@ -28,7 +26,7 @@ module.exports = {
                 errorMessage = "Missing 'email' field";
             } else if (!password) {
                 errorMessage = "Missing 'password' field";
-            }  
+            }
             if (errorMessage !== "") {
                 return res.status(400).json({ error: errorMessage });
             }
@@ -38,10 +36,10 @@ module.exports = {
             }
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
+
             const newUser = new user({ image, name, email, password: hashedPassword });
             const saveUser = await newUser.save();
-    
+
             if (saveUser) {
                 const userResponse = { _id: saveUser._id, image: saveUser.image, name: saveUser.name, email: saveUser.email };
                 return res.status(200).json({ message: "User Successful register", status: 200, user: userResponse });
@@ -53,7 +51,7 @@ module.exports = {
             return res.status(500).json({ error: "Something went wrong" });
         }
     },
-    
+
 
     login: async (req, res) => {
         try {
